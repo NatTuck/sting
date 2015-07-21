@@ -8,7 +8,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-
+import com.badlogic.gdx.math.Vector3;
 import com.ironbeard.simplex.OpenSimplexNoise;
 
 public class StingView {
@@ -58,17 +58,11 @@ public class StingView {
 				Texture tt = new Texture(Gdx.files.internal(tp));
 				tiles.put(name + ii, tt);
 			}
+			
+			String tp = "props/fort.png";
+			Texture tt = new Texture(Gdx.files.internal(tp));
+			tiles.put("castle", tt);
 		}
-	}
-	
-	public String tileAt(int ii, int jj) {
-		double nval = 10 * (1.0 + noise.eval(ii / 8.0, jj / 8.0));
-		if (nval < 5)  return "water0";
-		if (nval < 8)  return "sand0";
-		if (nval < 11) return "grass0";
-		if (nval < 14) return "dirt0";
-		if (nval < 16) return "swamp0";
-		return "bog0";
 	}
 	
 	public float tileSize() {
@@ -91,10 +85,6 @@ public class StingView {
 		return sy / tileSize() + baseY();
 	}
 	
-	public Posn screenToTile(Posn sp) {
-		return new Posn((int)screenToTileX(sp.x), (int)screenToTileY(sp.y));
-	}
-
 	public float tileToScreenX(float tx) {
 		return tileSize() * (tx - baseX());
 	}
@@ -103,13 +93,15 @@ public class StingView {
 		return tileSize() * (ty - baseY());
 	}
 	
-	public Posn tileToScreen(Posn tp) {
-		int sx = (int)(Math.round(tileSize() * (tp.x - baseX())));
-		int sy = (int)(Math.round(tileSize() * (tp.y - baseY())));
-		return new Posn(sx, sy);
+	public Posn mouseToTile(int mx, int my) {
+		Vector3 mv = new Vector3(mx, my, 0);
+		Vector3 sv = camera.unproject(mv, 0.0f, 0.0f, width, height);
+		int tx = (int)Math.floor(screenToTileX(sv.x));
+		int ty = (int)Math.floor(screenToTileY(sv.y));
+		return new Posn(tx, ty);
 	}
 	
-	public void	draw() {
+	public void	draw(GameState state) {
 		int rows = (int)(height / tileSize() + 1);
 		int cols = (int)(width  / tileSize() + 1);
 		
@@ -118,22 +110,25 @@ public class StingView {
 	
 		batch.begin();
 		
-		for (int ii = -1; ii < rows + 1; ++ii) {
-			for (int jj = -1; jj < cols + 1; ++jj) {
+		for (int ii = -2; ii < rows + 2; ++ii) {
+			for (int jj = -2; jj < cols + 2; ++jj) {
 				int ty = row0 + ii;
 				int tx = col0 + jj;
-				//float sy = ii * tileSize() - toY;
-				//float sx = jj * tileSize() - toX;
-				batch.draw(tiles.get(tileAt(ty, tx)), tileToScreenX(tx), tileToScreenY(ty), tileSize(), tileSize());
+				String tile = state.terrainAt(tx, ty) + state.varAt(tx, ty);
+				batch.draw(tiles.get(tile), tileToScreenX(tx), tileToScreenY(ty), tileSize(), tileSize());
+				
+				if (tx == 0 && ty == 0) {
+					batch.draw(tiles.get("castle"), tileToScreenX(tx), tileToScreenY(tx), tileSize(), tileSize());
+				}
 			}
 		}
 		
 		batch.end();
 	}
 	
-	public void render() {
+	public void render(GameState state) {
 		batch.setProjectionMatrix(camera.combined);
-		draw();
+		draw(state);
 	}
 	
 	public void resize(int ww, int hh) {
@@ -150,19 +145,6 @@ public class StingView {
 	public void panView(int dx, int dy) {
 		centerX += (float)(dx) / tileSize();
 		centerY += (float)(dy) / tileSize();
-		
-		int rows = (int)(height / tileSize() + 1);
-		int cols = (int)(width  / tileSize() + 1);
-		
-		int row0 = (int)(centerY - rows / 2);
-		int col0 = (int)(centerX - cols / 2);
-	
-		//int toX = MoreMath.floorMod(centerX * tileSize(), tileSize());
-		//int toY = MoreMath.floorMod(centerY * tileSize(), tileSize());
-		int toX = (int)(centerX * tileSize() % tileSize());
-		int toY = (int)(centerY * tileSize() % tileSize());
-	
-		Gdx.app.log("pan", "" + col0 + " " + row0 + " " + toX + " " + toY);
 	}
 	
 	public void zoomView(int amount) {

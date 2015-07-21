@@ -1,0 +1,20 @@
+Start:
+ - Fort
+ - 1000 Silver
+ - 1000 Food
+ - 100 Townsfolk
+ - 4 Guards
+
+Pay Scales:
+ - Townsfolk: None. Room & Board Only
+ - Guards: 1 Silver/day
+
+Build Farm:
+ - 20 Townsfolk
+ - 5 Days
+
+Farm In Operation:
+ - Employs 20 Farmers
+ - Produces 60 Food / Day
+
+

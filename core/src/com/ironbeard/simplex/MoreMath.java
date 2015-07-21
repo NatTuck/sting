@@ -1,4 +1,4 @@
-package com.ironbeard.sting;
+package com.ironbeard.simplex;
 
 public class MoreMath {
 	public static int floorMod(int x, int y) {
