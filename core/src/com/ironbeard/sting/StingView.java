@@ -7,6 +7,7 @@ import java.util.Random;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector3;
 import com.ironbeard.simplex.OpenSimplexNoise;
@@ -123,6 +124,11 @@ public class StingView {
 			}
 		}
 		
+		batch.end();
+		
+		BitmapFont font = Fonts.get("Lobster", 20);
+		batch.begin();
+		font.draw(batch, "Hello", 100, 100);
 		batch.end();
 	}
 	
