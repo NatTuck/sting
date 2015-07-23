@@ -1,16 +1,9 @@
 package com.ironbeard.sting;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
-
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector3;
-import com.ironbeard.simplex.OpenSimplexNoise;
 
 public class StingView {
 	public static String windowTitle = "Sting Game";
@@ -18,12 +11,7 @@ public class StingView {
 	public static int startHeight = 768;
 	public static int baseTileSize = 64;
 	
-	static Random rand = new Random();
-	
-	static String[] tileNames = {"bog", "swamp", "grass", "dirt", "ice", "sand", "water"};
-
 	OrthographicCamera camera;
-	SpriteBatch batch;
 
 	// Current window size in pixels.
 	int width;
@@ -34,9 +22,6 @@ public class StingView {
 	float centerY;
 	float zoom;
 	
-	OpenSimplexNoise noise;
-	Map<String, Texture> tiles;
-	
 	public StingView() {
 		width  = startWidth;
 		height = startHeight;
@@ -45,25 +30,28 @@ public class StingView {
 		centerY = 0.0f;
 		zoom = 1.0f;
 	
-		batch = new SpriteBatch();
-		
 		camera = new OrthographicCamera();
 		camera.setToOrtho(false, 1024, 768);
-		
-		noise = new OpenSimplexNoise(rand.nextInt(1024));
-		tiles = new HashMap<String, Texture>();
-		
-		for (String name : tileNames) {
-			for (int ii = 0; ii < 3; ++ii) {
-				String tp = "tiles/" + name + ii + ".png";
-				Texture tt = new Texture(Gdx.files.internal(tp));
-				tiles.put(name + ii, tt);
-			}
-			
-			String tp = "props/fort.png";
-			Texture tt = new Texture(Gdx.files.internal(tp));
-			tiles.put("castle", tt);
-		}
+	}
+	
+	public int getWidth() {
+		return width;
+	}
+	
+	public int getHeight() {
+		return height;
+	}
+	
+	public float getCenterX() {
+		return centerX;
+	}
+	
+	public float getCenterY() {
+		return centerY;
+	}
+	
+	public Camera getCam() {
+		return camera;
 	}
 	
 	public float tileSize() {
@@ -103,37 +91,17 @@ public class StingView {
 	}
 	
 	public void	draw(GameState state) {
-		int rows = (int)(height / tileSize() + 1);
-		int cols = (int)(width  / tileSize() + 1);
-		
-		int row0 = (int)(centerY - rows / 2);
-		int col0 = (int)(centerX - cols / 2);
+		TerrainView terrain = new TerrainView();
+		terrain.draw(this, state);
 	
-		batch.begin();
-		
-		for (int ii = -2; ii < rows + 2; ++ii) {
-			for (int jj = -2; jj < cols + 2; ++jj) {
-				int ty = row0 + ii;
-				int tx = col0 + jj;
-				String tile = state.terrainAt(tx, ty) + state.varAt(tx, ty);
-				batch.draw(tiles.get(tile), tileToScreenX(tx), tileToScreenY(ty), tileSize(), tileSize());
-				
-				if (tx == 0 && ty == 0) {
-					batch.draw(tiles.get("castle"), tileToScreenX(tx), tileToScreenY(tx), tileSize(), tileSize());
-				}
-			}
-		}
-		
-		batch.end();
-		
-		BitmapFont font = Fonts.get("Lobster", 20);
-		batch.begin();
-		font.draw(batch, "Hello", 100, 100);
-		batch.end();
+		PropsView props = new PropsView();
+		props.draw(this, state);
+	
+		InfoView info = state.getInfo();
+		info.draw(this, state);
 	}
 	
 	public void render(GameState state) {
-		batch.setProjectionMatrix(camera.combined);
 		draw(state);
 	}
 	

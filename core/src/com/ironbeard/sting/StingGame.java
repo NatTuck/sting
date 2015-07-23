@@ -13,7 +13,7 @@ public class StingGame extends ApplicationAdapter {
 	GameState state;
 	
 	@Override
-	public void create () {
+	public void create() {
 		input = new InputHandler(this);
 		Gdx.input.setInputProcessor(input);
 		
@@ -22,11 +22,13 @@ public class StingGame extends ApplicationAdapter {
 		//music.play();
 
 		state = new GameState(5, null);
+		state.initSetup();
+		
 		view = new StingView();
 	}
 
 	@Override
-	public void render () {
+	public void render() {
 		Gdx.gl.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
@@ -48,8 +50,6 @@ public class StingGame extends ApplicationAdapter {
 	
 	public void gotClick(int x, int y) {
 		Posn wp = view.mouseToTile(x, y);
-		
-		Gdx.app.log("click", "(" + x + ", " + y + ") [" + wp.x + ", " + wp.y + "]");
-		Gdx.app.log("click", "title: " + state.terrainAt(wp.x, wp.y));
+		state.showInfo(state.tileInfo(wp));
 	}
 }
